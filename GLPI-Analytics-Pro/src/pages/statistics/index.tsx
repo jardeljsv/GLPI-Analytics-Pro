@@ -1,27 +1,28 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { fetchTicketsByGroup, TicketsByGroupData } from '@/http/fetch-tickets-by-group';
 
 export const Statistics = () => {
-  // const ticketsByTechnicians = [
-  //   { name: 'Técnico A', tickets: 120 },
-  //   { name: 'Técnico B', tickets: 95 },
-  //   { name: 'Técnico C', tickets: 140 },
-  //   { name: 'Técnico D', tickets: 75 },
-  // ]
+  const [ticketsByGroup, setTicketsByGroup] = useState<TicketsByGroupData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // const ticketsByRequesters = [
-  //   { name: 'Requerente X', tickets: 200 },
-  //   { name: 'Requerente Y', tickets: 180 },
-  //   { name: 'Requerente Z', tickets: 150 },
-  //   { name: 'Requerente W', tickets: 130 },
-  // ]
-
-  // const ticketsOverTime = [
-  //   { date: '2023-12-01', tickets: 50 },
-  //   { date: '2023-12-02', tickets: 65 },
-  //   { date: '2023-12-03', tickets: 45 },
-  //   { date: '2023-12-04', tickets: 80 },
-  //   { date: '2023-12-05', tickets: 100 },
-  // ]
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchTicketsByGroup();
+        setTicketsByGroup(data);
+      } catch (err) {
+        setError('Falha ao carregar os dados de grupos.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   return (
     <div className="w-full space-y-6">
@@ -31,13 +32,13 @@ export const Statistics = () => {
           Estatísticas Gerais
         </h1>
         <p className="text-sm text-gray-500">
-          Visualize dados detalhados sobre técnicos, requerentes e chamados.
+          Visualize dados detalhados sobre técnicos, requerentes, chamados e grupos de atendimento.
         </p>
       </header>
 
       {/* Cards Resumidos */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="card-shadow">
           <CardHeader>
             <CardTitle>Total de Chamados</CardTitle>
           </CardHeader>
@@ -46,7 +47,7 @@ export const Statistics = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-shadow">
           <CardHeader>
             <CardTitle>Técnicos Ativos</CardTitle>
           </CardHeader>
@@ -55,7 +56,7 @@ export const Statistics = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-shadow">
           <CardHeader>
             <CardTitle>Média de Resolução</CardTitle>
           </CardHeader>
@@ -64,7 +65,7 @@ export const Statistics = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-shadow">
           <CardHeader>
             <CardTitle>Chamados Pendentes</CardTitle>
           </CardHeader>
@@ -76,63 +77,31 @@ export const Statistics = () => {
 
       {/* Gráficos */}
       <section className="space-y-6">
-        {/* Gráfico de Barras - Chamados por Técnico */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Chamados por Técnico</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={ticketsByTechnicians}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <ChartTooltip />
-                <ChartLegend />
-                <Bar dataKey="tickets" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card> */}
-
-        {/* Gráfico de Barras Horizontais - Chamados por Requerente */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Chamados por Requerente</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart layout="vertical" data={ticketsByRequesters}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="name" />
-                <ChartTooltip />
-                <ChartLegend />
-                <Bar dataKey="tickets" fill="#82ca9d" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card> */}
-
-        {/* Gráfico de Linhas - Chamados ao Longo do Tempo */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Tendência de Chamados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={ticketsOverTime}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <ChartTooltip />
-                <ChartLegend />
-                <Line type="monotone" dataKey="tickets" stroke="#8884d8" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card> */}
+        {loading && <p>Carregando dados de estatísticas...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+        {ticketsByGroup && (
+          <Card className="card-shadow">
+            <CardHeader>
+              <CardTitle>Chamados por Grupo de Atendimento</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer className="w-full h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={ticketsByGroup.ticketsByGroup} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis type="category" dataKey="groupName" width={150} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Legend />
+                    <Bar dataKey="ticketsCount" fill="hsl(var(--chart-1))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        )}
       </section>
     </div>
   );
 }
+

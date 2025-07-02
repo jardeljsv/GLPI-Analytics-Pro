@@ -14,6 +14,10 @@ export const config: Knex.Config = {
     database: env.DB_DATABASE,
   },
   useNullAsDefault: true,
+  migrations: {
+    directory: './database/migrations',
+    extension: 'ts',
+  },
 };
 
 // Instância do Knex

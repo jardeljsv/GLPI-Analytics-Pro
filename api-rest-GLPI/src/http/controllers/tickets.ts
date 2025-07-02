@@ -8,12 +8,48 @@ import { getTicketsOverview } from "@/use-cases/get-tickets-overview";
 import { getTicketsDateTime } from "@/use-cases/get-tickets-date-time";
 import { getTicketsTechnician } from "@/use-cases/get-tickets-technician";
 import { getTicketsCategories } from "@/use-cases/get-tickets-categories";
+import { getTicketsAnalytics } from "@/use-cases/get-tickets-analytics";
+import { getTicketsByRequester } from "@/use-cases/get-tickets-by-requester";
+import { getTicketsDetailsByCriteria } from "@/use-cases/get-tickets-details-by-criteria";
+import { getTicketsByGroup } from "@/use-cases/get-tickets-by-group";
 import {
   getTicketsDetails,
   getTicketsPending,
 } from "@/use-cases/get-tickets-pending";
 
 export async function ticketsController(app: FastifyInstance) {
+  app.get("/analytics", { onRequest: [verifyJwt] }, async (req, reply) => {
+    const analyticsQuerySchema = z.object({
+      period: z.enum(['today', 'week', 'month']).optional(),
+    });
+    const { period } = analyticsQuerySchema.parse(req.query);
+
+    const analyticsData = await getTicketsAnalytics({ period });
+    return reply.status(200).send(analyticsData);
+  });
+
+  app.get("/details", { onRequest: [verifyJwt] }, async (req, reply) => {
+    const detailsQuerySchema = z.object({
+      criteriaType: z.enum(['status', 'priority']),
+      criteriaValue: z.string(),
+      period: z.enum(['today', 'week', 'month']).optional(),
+    });
+    const { criteriaType, criteriaValue, period } = detailsQuerySchema.parse(req.query);
+
+    const detailsData = await getTicketsDetailsByCriteria({ criteriaType, criteriaValue, period });
+    return reply.status(200).send(detailsData);
+  });
+
+  app.get("/groups", { onRequest: [verifyJwt] }, async (_, reply) => {
+    const groupData = await getTicketsByGroup();
+    return reply.status(200).send(groupData);
+  });
+
+  app.get("/requesters", { onRequest: [verifyJwt] }, async (req, reply) => {
+    const requesterData = await getTicketsByRequester();
+    return reply.status(200).send(requesterData);
+  });
+
   app.get("/search", { onRequest: [verifyJwt] }, async (req, reply) => {
     const requestIdTicketQuerySchema = z.object({
       id: z.coerce.number().optional(),

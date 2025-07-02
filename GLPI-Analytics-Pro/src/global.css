@@ -55,6 +55,19 @@ body {
   background-color: #ff7b24;
 }
 
+.card-shadow {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.card-shadow:hover {
+  transform: translateY(-5px);
+}
+
+.tabs-trigger-transition {
+  transition: all 0.3s ease-in-out;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -117,5 +130,21 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  .primary-bg {
+    background-color: var(--primary-color);
+  }
+
+  .secondary-bg {
+    background-color: var(--secondary-color);
+  }
+
+  .primary-text {
+    color: var(--primary-color);
+  }
+
+  .secondary-text {
+    color: var(--secondary-color);
   }
 }

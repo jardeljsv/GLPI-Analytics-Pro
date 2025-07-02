@@ -1,10 +1,13 @@
 import { BrowserRouter } from "react-router-dom";
 import { Router } from "./routes/Router";
+import { SettingsProvider } from "./contexts/SettingsContext";
 
 export function App() {
   return (
     <BrowserRouter>
-      <Router />
+      <SettingsProvider>
+        <Router />
+      </SettingsProvider>
     </BrowserRouter>
   );
 }

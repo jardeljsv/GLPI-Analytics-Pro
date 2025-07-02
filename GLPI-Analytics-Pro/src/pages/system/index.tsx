@@ -1,85 +1,147 @@
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useState, useEffect } from 'react';
+import { api } from '@/http/api';
+
+interface SettingsData {
+  primary_color: string;
+  secondary_color: string;
+  logo_url: string | null;
+}
 
 export const Settings = () => {
+  const [settings, setSettings] = useState<SettingsData>({
+    primary_color: '#4EA8DE',
+    secondary_color: '#8284FA',
+    logo_url: null,
+  });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/settings');
+        setSettings(response.data);
+      } catch (err) {
+        setError('Falha ao carregar as configurações.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSettings((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setLogoFile(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Atualizar cores
+      await api.post('/settings', {
+        primary_color: settings.primary_color,
+        secondary_color: settings.secondary_color,
+      });
+
+      // Upload da logomarca, se houver
+      if (logoFile) {
+        const formData = new FormData();
+        formData.append('logo', logoFile);
+        const uploadResponse = await api.post('/settings/logo', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        setSettings((prev) => ({ ...prev, logo_url: uploadResponse.data.logo_url }));
+      }
+
+      setSuccess('Configurações salvas com sucesso!');
+    } catch (err) {
+      setError('Falha ao salvar as configurações.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full m-24">
-      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-semibold text-gray-700">Configurações</h1>
+      <Card className="max-w-4xl mx-auto p-6 rounded-lg shadow-md card-shadow">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold text-gray-700">Configurações do Sistema</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading && <p>Carregando configurações...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {success && <p className="text-green-500">{success}</p>}
 
-        <form className="space-y-6 mt-6">
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700" htmlFor="username">
-              Nome de usuário
-            </label>
-            <Input
-              id="username"
-              type="text"
-              className="mt-2 w-full px-4 py-2 border rounded-md text-gray-700"
-              placeholder="Digite seu nome de usuário"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700" htmlFor="email">
-              Endereço de e-mail
-            </label>
-            <Input
-              id="email"
-              type="email"
-              className="mt-2 w-full px-4 py-2 border rounded-md text-gray-700"
-              placeholder="Digite seu e-mail"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700" htmlFor="password">
-              Nova senha
-            </label>
-            <Input
-              id="password"
-              type="password"
-              className="mt-2 w-full px-4 py-2 border rounded-md text-gray-700"
-              placeholder="Digite uma nova senha"
-            />
-          </div> */}
-
-          <div>
-            <label
-              className="block text-sm font-medium text-gray-700"
-              htmlFor="notifications"
-            >
-              Notificações
-            </label>
-            <div className="mt-2 flex items-center space-x-4">
-              <Button className="bg-blue-500 text-white px-4 py-2 rounded">
-                Ativar
-              </Button>
-              <Button className="bg-gray-500 text-white px-4 py-2 rounded">
-                Desativar
-              </Button>
-            </div>
-          </div>
-
-          <div className="group flex items-center gap-2 p-2 rounded hover:bg-white border border-transparent hover:border-orange-400 transition duration-300 ease-in-out">
-            {/* <Switch className="group relative flex h-5 w-12 cursor-pointer rounded-full bg-white border border-gray-300 p-1 transition-colors duration-200 ease-in-out focus:outline-none data-[focus]:outline-1 data-[focus]:outline-white data-[checked]:bg-white/10">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none inline-block size-3 translate-x-0 rounded-full bg-gray-500 ring-0 shadow-lg transition duration-200 ease-in-out group-data-[checked]:translate-x-7"
+          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+            <div>
+              <Label htmlFor="primary_color">Cor Primária</Label>
+              <Input
+                id="primary_color"
+                name="primary_color"
+                type="color"
+                value={settings.primary_color}
+                onChange={handleColorChange}
+                className="mt-2 w-24 h-12 p-1 border rounded-md"
               />
-            </Switch> */}
-            <span className="text-gray-500">Modo Escuro/Claro</span>
-          </div>
+            </div>
 
-          <div>
-            <Button
-              type="submit"
-              className="w-full bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Salvar alterações
+            <div>
+              <Label htmlFor="secondary_color">Cor Secundária</Label>
+              <Input
+                id="secondary_color"
+                name="secondary_color"
+                type="color"
+                value={settings.secondary_color}
+                onChange={handleColorChange}
+                className="mt-2 w-24 h-12 p-1 border rounded-md"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="logo_upload">Logomarca</Label>
+              <Input
+                id="logo_upload"
+                name="logo_upload"
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                className="mt-2"
+              />
+              {settings.logo_url && (
+                <div className="mt-4">
+                  <p>Logomarca atual:</p>
+                  <img src={settings.logo_url} alt="Logomarca" className="max-h-24 mt-2" />
+                </div>
+              )}
+            </div>
+
+            <Button type="submit" className="w-full bg-green-500 text-white px-4 py-2 rounded" disabled={loading}>
+              {loading ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};

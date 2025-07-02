@@ -8,7 +8,7 @@ import {
   CardWrapper,
 } from "@/components/Card/Card";
 
-import { ArrowsLeftRight, Timer } from "phosphor-react";
+import { ArrowsLeftRight, Timer, UsersThree } from "phosphor-react";
 
 import { Header } from "./header";
 
@@ -24,12 +24,34 @@ import { useTicketsPending, useTicketsSummary } from "./api/tickets.queries";
 import { useEffect, useState } from "react";
 import { SpinnerBall } from "@phosphor-icons/react";
 import { BarChartsTickets } from "./components/BarCharts";
+import { fetchTicketsByGroup } from "@/http/fetch-tickets-by-group";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 export const Home = () => {
   const { data: statusData, isLoading: isLoadingStatus } = useTicketsPending();
   const { data: summaryData } = useTicketsSummary();
+  const [ticketsByGroup, setTicketsByGroup] = useState<{ groupName: string; ticketsCount: number }[]>([]);
 
-  // const { data: technicianData } = useTicketsTechnician();
+  const COLORS = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+  ];
+
+  useEffect(() => {
+    const loadGroupData = async () => {
+      try {
+        const data = await fetchTicketsByGroup();
+        setTicketsByGroup(data.ticketsByGroup);
+      } catch (error) {
+        console.error("Failed to fetch group data", error);
+      }
+    };
+    loadGroupData();
+  }, []);
+
   const [statusTickets, setStatusTickets] = useState(statusData);
 
   useEffect(() => {
@@ -44,6 +66,8 @@ export const Home = () => {
       </div>
     );
   }
+
+  const totalGroups = ticketsByGroup.length;
 
   return (
     <main className="flex flex-col w-full h-[max-content] h-full">
@@ -99,18 +123,56 @@ export const Home = () => {
                 </CardFlash>
               ))}
             </CardWrapper>
+
+            {totalGroups > 0 && (
+              <CardWrapper>
+                <CardFlash key="total-groups">
+                  <CardIcon className="bg-blue-500 border border-blue-700 text-4xl">
+                    <UsersThree />
+                  </CardIcon>
+                  <CardInformations
+                    className="text-5xl"
+                    count={totalGroups}
+                    name="Total de Grupos"
+                  />
+                </CardFlash>
+              </CardWrapper>
+            )}
           </CardRoot>
 
           <div className="flex flex-col max-h-screen w-full mt-2 flex-1">
             {summaryData && (
               <BarChartsTickets
-                // priority={statusTickets.meta.priority}
-                // status={statusTickets.meta.type}
                 categorie={summaryData.meta.categories}
                 concludes={summaryData.list}
                 delayed={summaryData.meta.delayed}
-                // technician={technicianData}
               />
+            )}
+
+            {ticketsByGroup.length > 0 && (
+              <div className="mt-4">
+                <h2 className="text-xl font-bold mb-2">Chamados por Grupo</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={ticketsByGroup}
+                      dataKey="ticketsCount"
+                      nameKey="groupName"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      fill="#8884d8"
+                      label
+                    >
+                      {ticketsByGroup.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             )}
           </div>
         </>
@@ -118,3 +180,4 @@ export const Home = () => {
     </main>
   );
 }
+
