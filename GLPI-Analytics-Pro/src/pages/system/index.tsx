@@ -27,7 +27,7 @@ export const Settings = () => {
       try {
         setLoading(true);
         const response = await api.get('/settings');
-        setSettings(response.data);
+        setSettings(response.data as SettingsData);
       } catch (err) {
         setError('Falha ao carregar as configurações.');
       } finally {
@@ -65,12 +65,8 @@ export const Settings = () => {
       if (logoFile) {
         const formData = new FormData();
         formData.append('logo', logoFile);
-        const uploadResponse = await api.post('/settings/logo', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        setSettings((prev) => ({ ...prev, logo_url: uploadResponse.data.logo_url }));
+        const uploadResponse = await api.post('/settings/logo', formData);
+        setSettings((prev) => ({ ...prev, logo_url: (uploadResponse.data as { logo_url: string }).logo_url }));
       }
 
       setSuccess('Configurações salvas com sucesso!');

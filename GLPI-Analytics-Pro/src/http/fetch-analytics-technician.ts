@@ -8,5 +8,5 @@ export interface TechnicianAnalyticsData {
 
 export async function fetchTechnicianAnalytics(): Promise<TechnicianAnalyticsData> {
   const response = await api.get("/tickets/tickets-technician");
-  return response.data;
+  return response.data as TechnicianAnalyticsData;
 }

@@ -34,7 +34,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     const fetchSettings = async () => {
       try {
         const response = await api.get('/settings');
-        setSettings(response.data);
+        setSettings(response.data as Settings);
       } catch (err) {
         console.error("Failed to fetch settings", err);
       } finally {

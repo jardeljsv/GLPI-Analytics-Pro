@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { fetchTicketsByGroup, TicketsByGroupData } from '@/http/fetch-tickets-by-group';
 
 export const Statistics = () => {
@@ -85,7 +85,7 @@ export const Statistics = () => {
               <CardTitle>Chamados por Grupo de Atendimento</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer className="w-full h-[400px]">
+              <ChartContainer config={{}} className="w-full h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={ticketsByGroup.ticketsByGroup} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" />

@@ -164,7 +164,7 @@ export const Home = () => {
                       fill="#8884d8"
                       label
                     >
-                      {ticketsByGroup.map((entry, index) => (
+                      {ticketsByGroup.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>

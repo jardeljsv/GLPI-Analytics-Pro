@@ -14,5 +14,5 @@ export interface TicketsAnalyticsData {
 
 export async function fetchTicketsAnalytics(): Promise<TicketsAnalyticsData> {
   const response = await api.get("/tickets/categories");
-  return response.data;
+  return response.data as TicketsAnalyticsData;
 }

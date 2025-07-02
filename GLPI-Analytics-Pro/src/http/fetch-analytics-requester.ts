@@ -7,5 +7,5 @@ export interface RequesterAnalyticsData {
 
 export async function fetchRequesterAnalytics(): Promise<RequesterAnalyticsData> {
   const response = await api.get("/tickets/requesters");
-  return response.data;
+  return response.data as RequesterAnalyticsData;
 }

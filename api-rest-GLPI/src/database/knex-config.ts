@@ -34,4 +34,4 @@ export async function testConnectionDatabase() {
   }
 }
 
-testConnectionDatabase().catch(() => process.exit(1));
+

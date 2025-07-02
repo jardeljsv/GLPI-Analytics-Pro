@@ -8,6 +8,6 @@ export interface AnalyticsData {
 }
 
 export async function fetchAnalyticsOverview(period?: string): Promise<AnalyticsData> {
-  const response = await api.get("/tickets/analytics", { params: { period } });
-  return response.data;
+  const response = await api.get("/tickets/analytics", period ? { period } : {});
+  return response.data as AnalyticsData;
 }

@@ -7,5 +7,5 @@ export interface TicketsByGroupData {
 
 export async function fetchTicketsByGroup(): Promise<TicketsByGroupData> {
   const response = await api.get("/tickets/groups");
-  return response.data;
+  return response.data as TicketsByGroupData;
 }

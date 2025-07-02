@@ -15,7 +15,7 @@ import { fetchAnalyticsOverview, AnalyticsData } from '@/http/fetch-analytics-ov
 import { fetchTechnicianAnalytics, TechnicianAnalyticsData } from '@/http/fetch-analytics-technician';
 import { fetchRequesterAnalytics, RequesterAnalyticsData } from '@/http/fetch-analytics-requester';
 import { fetchTicketsAnalytics, TicketsAnalyticsData } from '@/http/fetch-analytics-tickets';
-import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie, Cell, Line } from 'recharts';
+import { Bar, XAxis, YAxis, CartesianGrid, Legend, Pie, Cell, Line } from 'recharts';
 import {
   Table,
   TableBody,
@@ -116,8 +116,8 @@ export const Analytics = () => {
     setIsModalLoading(true);
 
     try {
-      const response = await api.get("/tickets/details", { params: { criteriaType, criteriaValue, period } });
-      setModalContent(response.data.tickets);
+      const response = await api.get("/tickets/details", { criteriaType, criteriaValue, period });
+      setModalContent((response.data as { tickets: any[] }).tickets);
     } catch (error) {
       console.error("Failed to fetch details", error);
       setModalContent([]);
@@ -190,8 +190,8 @@ export const Analytics = () => {
                   <h2 className="font-semibold text-lg">Chamados por Status</h2>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer className="w-full h-64">
-                    <BarChart data={analyticsData.ticketsByStatus} onClick={(data) => handleChartClick('status', data.activePayload[0].payload.name)}>
+                  <ChartContainer config={{}} className="w-full h-64">
+                    <BarChart data={analyticsData.ticketsByStatus} onClick={(data) => data.activePayload && handleChartClick('status', data.activePayload[0].payload.name)}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
@@ -207,10 +207,10 @@ export const Analytics = () => {
                   <h2 className="font-semibold text-lg">Chamados por Urgência</h2>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer className="w-full h-64">
+                  <ChartContainer config={{}} className="w-full h-64">
                     <PieChart>
                       <Pie data={analyticsData.ticketsByPriority} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="hsl(var(--chart-2))" label onClick={(data) => handleChartClick('priority', data.name)}>
-                        {analyticsData.ticketsByPriority.map((entry, index) => (
+                        {analyticsData.ticketsByPriority.map((_, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -225,7 +225,7 @@ export const Analytics = () => {
                   <h2 className="font-semibold text-lg">Tendências Mensais</h2>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer className="w-full h-64">
+                  <ChartContainer config={{}} className="w-full h-64">
                     <LineChart data={analyticsData.ticketsTrend}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
@@ -251,7 +251,7 @@ export const Analytics = () => {
                   <h2 className="font-semibold text-lg">Chamados Atribuídos por Técnico</h2>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer className="w-full h-96">
+                  <ChartContainer config={{}} className="w-full h-96">
                     <BarChart data={technicianData.ticketsAmountTechnician} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" />
@@ -268,7 +268,7 @@ export const Analytics = () => {
                   <h2 className="font-semibold text-lg">Chamados Solucionados por Técnico</h2>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer className="w-full h-96">
+                  <ChartContainer config={{}} className="w-full h-96">
                     <BarChart data={technicianData.ticketsAmountTechnicianSolution} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" />
@@ -293,7 +293,7 @@ export const Analytics = () => {
                 <h2 className="font-bold text-xl">Top 15 Requerentes por Chamados Abertos</h2>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="w-full h-[500px]">
+                <ChartContainer config={{}} className="w-full h-[500px]">
                   <BarChart data={requesterData.ticketsByRequester} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
@@ -318,10 +318,10 @@ export const Analytics = () => {
                   <CardTitle>Chamados por Categoria</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer className="w-full h-80">
+                  <ChartContainer config={{}} className="w-full h-80">
                     <PieChart>
                       <Pie data={ticketsData.categories_amount} dataKey="tickets_amount" nameKey="category" cx="50%" cy="50%" outerRadius={100} fill="hsl(var(--chart-2))" label>
-                        {ticketsData.categories_amount.map((entry, index) => (
+                        {ticketsData.categories_amount.map((_, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
