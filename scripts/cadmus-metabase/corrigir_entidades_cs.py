@@ -80,9 +80,31 @@ def helper_sql(name):
           "WHERE t.is_deleted=0 AND t.entities_id IN %s "
           "AND g.name IS NOT NULL AND TRIM(g.name)<>'' ORDER BY valor"%scope)
 
+# O relatório de auditoria confirmou escopo com 11 entidades (sem 162).
+# Ajuste a cláusula externa da consulta, sem substituir os grupos Cadmus/PeoplePro.
+SCOPE_OLD11=re.compile(r"\\bt\\.entities_id\\s+IN\\s*\\(\\s*137\\s*,\\s*138\\s*,\\s*139\\s*,\\s*140\\s*,\\s*141\\s*,\\s*142\\s*,\\s*159\\s*,\\s*160\\s*,\\s*161\\s*,\\s*164\\s*,\\s*165\\s*\\)",re.I)
+SCOPE_NEW=re.compile(r"\\bt\\.entities_id\\s+IN\\s*\\(\\s*137\\s*,\\s*138\\s*,\\s*139\\s*,\\s*140\\s*,\\s*141\\s*,\\s*142\\s*,\\s*159\\s*,\\s*160\\s*,\\s*161\\s*,\\s*162\\s*,\\s*164\\s*,\\s*165\\s*\\)",re.I)
+COMPACT_CASE_RX=re.compile(r"CASE\\s+WHEN\\s+t\\.entities_id\\s+IN\\s*\\(\\s*138\\s*,\\s*160\\s*\\)\\s+THEN\\s+'Cadmus'\\s+ELSE\\s+'PeoplePro'\\s+END",re.I)
+
+
 def apply_scope(sql):
  sql=SCOPE_RX.sub("t.entities_id IN "+SCOPE,sql)
+ sql=SCOPE_OLD11.sub("t.entities_id IN "+SCOPE,sql)
  sql=CASE_RX.sub(CASE,sql)
+ sql=COMPACT_CASE_RX.sub(CASE,sql)
+ # O CASE de Organização expandido existe em todos os cards da auditoria.
+ # Acrescentar 162 apenas quando ainda não estiver presente.
+ if "t.entities_id=162 THEN 'GESTÃO DE ATIVOS'" not in sql:
+  needle="WHEN t.entities_id=164 THEN 'SEGINFO E SITES'"
+  if needle in sql:
+   sql=sql.replace(needle,
+       "WHEN t.entities_id=162 THEN 'GESTÃO DE ATIVOS'\\n "+needle)
+ if not SCOPE_NEW.search(sql):
+  raise RuntimeError("Escopo de 12 entidades não localizado após transformação")
+ if SCOPE_OLD11.search(sql):
+  raise RuntimeError("Permaneceu escopo antigo de 11 entidades")
+ if "t.entities_id=162 THEN 'GESTÃO DE ATIVOS'" not in sql:
+  raise RuntimeError("CASE de Organização ainda não inclui Gestão de Ativos 162")
  return sql
 
 def new_chart_series(sql,cid):
@@ -179,7 +201,10 @@ def run():
   sql,fmt=query_get(c)
   label=c["name"]
   if c["id"]==41:
-   new=apply_scope(sql)
+   new=SCOPE_RX.sub("t.entities_id IN "+SCOPE,sql)
+   new=SCOPE_OLD11.sub("t.entities_id IN "+SCOPE,new)
+   if not SCOPE_NEW.search(new):
+    raise RuntimeError("Lista de técnicos não contém escopo 162")
   else:
    new=helper_sql(label)
   if new!=sql:
