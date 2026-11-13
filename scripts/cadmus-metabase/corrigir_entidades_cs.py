@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Amplia a Central de Serviços para entidades de Administrativo e TI.
+"""Amplia a Central de Serviços para entidades de Administrativo, Gestão de Ativos e TI.
 
-Admin: 137,138,139,140,141,142; TI: 159,160,161,164,165.
+Admin: 137,138,139,140,141,142; Gestão de Ativos: 162; TI: 159,160,161,164,165.
 Exclui PeopleTech(156), PPPRO(157), Beefor(158).
-Não inclui ROOT(0), LIGA ÁGIL(83), GESTÃO DE ATIVOS(162).
+Não inclui ROOT(0) e LIGA ÁGIL(83).
 
 Atualiza perguntas 40,42..56, lista de Técnicos (41), fontes dos filtros
 Entidade/Grupo Técnico (se existentes), e opções de Organização.
@@ -19,8 +19,8 @@ import argparse,copy,datetime,json,os,re,sys,urllib.request,urllib.error
 BASE=os.getenv("MB_URL","http://127.0.0.1:3000").rstrip("/")
 KEY=os.getenv("MB_API_KEY","")
 IDS=[40]+list(range(42,57))
-SCOPE="(137,138,139,140,141,142,159,160,161,164,165)"
-ORGS=["Cadmus","PeoplePro","VENTRON","SETÚRIA","LIGA ÁGIL","ADMINISTRATIVO","TI","RPA","SEGINFO E SITES"]
+SCOPE="(137,138,139,140,141,142,159,160,161,162,164,165)"
+ORGS=["Cadmus","PeoplePro","VENTRON","SETÚRIA","LIGA ÁGIL","ADMINISTRATIVO","TI","GESTÃO DE ATIVOS","RPA","SEGINFO E SITES"]
 CASE="""CASE
  WHEN t.entities_id IN (138,160) THEN 'Cadmus'
  WHEN t.entities_id IN (140,161) THEN 'PeoplePro'
@@ -29,11 +29,12 @@ CASE="""CASE
  WHEN t.entities_id=142 THEN 'LIGA ÁGIL'
  WHEN t.entities_id=137 THEN 'ADMINISTRATIVO'
  WHEN t.entities_id=159 THEN 'TI'
+ WHEN t.entities_id=162 THEN 'GESTÃO DE ATIVOS'
  WHEN t.entities_id=164 THEN 'SEGINFO E SITES'
  WHEN t.entities_id=165 THEN 'RPA'
  END"""
 CASE_RX=re.compile(r"CASE\s+WHEN\s+t\.entities_id\s+IN\s*\(\s*138\s*,\s*160\s*\)\s+THEN\s+'Cadmus'\s+(?:WHEN\s+t\.entities_id\s+IN\s*\(\s*140\s*,\s*161\s*\)\s+THEN\s+'PeoplePro'|ELSE\s+'PeoplePro')\s+END",re.I)
-SCOPE_RX=re.compile(r"\bt\.entities_id\s+IN\s*\(\s*138\s*,\s*140\s*,\s*160\s*,\s*161\s*\)",re.I)
+SCOPE_RX=re.compile(r"\bt\.entities_id\s+IN\s*\(\s*(?:138\s*,\s*140\s*,\s*160\s*,\s*161|137\s*,\s*138\s*,\s*139\s*,\s*140\s*,\s*141\s*,\s*142\s*,\s*159\s*,\s*160\s*,\s*161\s*,\s*164\s*,\s*165)\s*\)",re.I)
 KEEP=("id","card_id","row","col","size_x","size_y","parameter_mappings",
       "visualization_settings","dashboard_tab_id","action_id","inline_parameters")
 
@@ -184,8 +185,8 @@ def run():
   if new!=sql:
    helpers.append((c,{"dataset_query":query_set(c,new,fmt)}))
  patch=patch_dashboard(d)
- print("NOVO ESCOPO: Administrativo 137,138,139,140,141,142 | TI 159,160,161,164,165")
- print("EXCLUÍDOS: 156,157,158; ROOT 0; LIGA ÁGIL 83; GESTÃO DE ATIVOS 162")
+ print("NOVO ESCOPO: Administrativo 137,138,139,140,141,142 | Gestão de Ativos 162 | TI 159,160,161,164,165")
+ print("EXCLUÍDOS: 156,157,158; ROOT 0; LIGA ÁGIL 83")
  print("Perguntas a revisar:",len(updates),"| Listas auxiliares a ajustar:",len(helpers))
  for c,(payload,changed) in updates:
   print(c["id"],"SQL atualizado" if changed else "SQL sem alteração","-",c["name"])
