@@ -37,9 +37,9 @@ DATABASE_ID = 2
 # Deliberadamente limitado ao filtro adotado pelos scripts desta coleção.
 # Não transforma outros filtros SQL por entidade.
 ENTITY_PATTERN = r"\b(?:[a-zA-Z_][a-zA-Z_0-9]*\.)?entities_id\s+IN\s*\(\s*83\s*,\s*137\s*,\s*162\s*\)"
-AND_SCOPE_RE = re.compile(r"\s+AND\s+" + ENTITY_PATTERN + r"\b", re.IGNORECASE)
+AND_SCOPE_RE = re.compile(r"\s+AND\s+" + ENTITY_PATTERN, re.IGNORECASE)
 WHERE_SCOPE_RE = re.compile(r"\bWHERE\s+" + ENTITY_PATTERN + r"\s+AND\s+", re.IGNORECASE)
-WHERE_ONLY_SCOPE_RE = re.compile(r"\bWHERE\s+" + ENTITY_PATTERN + r"\b", re.IGNORECASE)
+WHERE_ONLY_SCOPE_RE = re.compile(r"\bWHERE\s+" + ENTITY_PATTERN, re.IGNORECASE)
 SCOPE_PROSE_RE = re.compile(
     r"Escopo inicial:\s*registros das entidades GLPI\s*83,\s*137\s*e\s*162\.\s*"
     r"Os ativos ainda não estão segregados entre Cadmus e PeoplePro no inventário\.",
