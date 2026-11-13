@@ -430,13 +430,14 @@ def main():
     print("Dashboard:",did,"Coleção:",cid)
     print("19 perguntas; 5 filtros; escopo todas as entidades GLPI.")
     print("Filtros: "+", ".join(label for _,label in FILTERS))
+    if args.apply:
+        backup(list(questions.values()),dash)
     helper_ids=create_helpers(cols,objects,cid,args.apply)
     for num in sorted(questions):
         print("%s pergunta %02d - ID %s"%(("ATUALIZAR" if args.apply else "SIMULAR"),num,questions[num]["id"]))
     if not args.apply:
         print("SIMULAÇÃO: nenhuma escrita efetuada. Para aplicar: --apply")
         return
-    backup(list(questions.values()),dash)
     for num in sorted(questions):
         card=questions[num]
         payload=modify_card(card,expected_sql[num],helper_ids)
