@@ -82,9 +82,9 @@ def helper_sql(name):
 
 # O relatório de auditoria confirmou escopo com 11 entidades (sem 162).
 # Ajuste a cláusula externa da consulta, sem substituir os grupos Cadmus/PeoplePro.
-SCOPE_OLD11=re.compile(r"\\bt\\.entities_id\\s+IN\\s*\\(\\s*137\\s*,\\s*138\\s*,\\s*139\\s*,\\s*140\\s*,\\s*141\\s*,\\s*142\\s*,\\s*159\\s*,\\s*160\\s*,\\s*161\\s*,\\s*164\\s*,\\s*165\\s*\\)",re.I)
-SCOPE_NEW=re.compile(r"\\bt\\.entities_id\\s+IN\\s*\\(\\s*137\\s*,\\s*138\\s*,\\s*139\\s*,\\s*140\\s*,\\s*141\\s*,\\s*142\\s*,\\s*159\\s*,\\s*160\\s*,\\s*161\\s*,\\s*162\\s*,\\s*164\\s*,\\s*165\\s*\\)",re.I)
-COMPACT_CASE_RX=re.compile(r"CASE\\s+WHEN\\s+t\\.entities_id\\s+IN\\s*\\(\\s*138\\s*,\\s*160\\s*\\)\\s+THEN\\s+'Cadmus'\\s+ELSE\\s+'PeoplePro'\\s+END",re.I)
+SCOPE_OLD11=re.compile(r"\bt\.entities_id\s+IN\s*\(\s*137\s*,\s*138\s*,\s*139\s*,\s*140\s*,\s*141\s*,\s*142\s*,\s*159\s*,\s*160\s*,\s*161\s*,\s*164\s*,\s*165\s*\)",re.I)
+SCOPE_NEW=re.compile(r"\bt\.entities_id\s+IN\s*\(\s*137\s*,\s*138\s*,\s*139\s*,\s*140\s*,\s*141\s*,\s*142\s*,\s*159\s*,\s*160\s*,\s*161\s*,\s*162\s*,\s*164\s*,\s*165\s*\)",re.I)
+COMPACT_CASE_RX=re.compile(r"CASE\s+WHEN\s+t\.entities_id\s+IN\s*\(\s*138\s*,\s*160\s*\)\s+THEN\s+'Cadmus'\s+ELSE\s+'PeoplePro'\s+END",re.I)
 
 
 def apply_scope(sql):
@@ -98,7 +98,7 @@ def apply_scope(sql):
   needle="WHEN t.entities_id=164 THEN 'SEGINFO E SITES'"
   if needle in sql:
    sql=sql.replace(needle,
-       "WHEN t.entities_id=162 THEN 'GESTÃO DE ATIVOS'\\n "+needle)
+       "WHEN t.entities_id=162 THEN 'GESTÃO DE ATIVOS'\n "+needle)
  if not SCOPE_NEW.search(sql):
   raise RuntimeError("Escopo de 12 entidades não localizado após transformação")
  if SCOPE_OLD11.search(sql):
